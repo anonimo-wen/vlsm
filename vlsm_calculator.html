@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora VLSM - Todo en un Archivo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 25px 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.05rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        #btn-calcular {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        #btn-limpiar {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        th {
+            background: #34495e;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .ip-cell {
+            background: #e8f4fc;
+            color: #2c3e50;
+            font-weight: 500;
+            border-radius: 4px;
+            padding: 2px 6px;
+        }
+
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .warning {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c0392b;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #c0392b;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .info-box {
+            background: #fffde7;
+            border-left: 5px solid #f1c40f;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #2c3e50;
+            color: white;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .main-content {
+                padding: 15px;
+            }
+            
+            button {
+                min-width: 100%;
+            }
+            
+            .stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1> Calculadora VLSM</h1>
+            <p class="subtitle">Subneteo de Longitud Variable - Cálculo en Tiempo Real</p>
+        </header>
+
+        <div class="main-content">
+            <div class="input-section">
+                <div class="form-group">
+                    <label for="ip-base"> Dirección IP Base (ej: 192.168.30.0):</label>
+                    <input type="text" id="ip-base" value="" placeholder="Ingrese la IP de red">
+                </div>
+
+                <div class="form-group">
+                    <label for="hosts"> Hosts por Subred (separados por coma):</label>
+                    <input type="text" id="hosts" value="" placeholder="Ej: 7000, 5000, 500, 2, 2">
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Los hosts se ordenarán automáticamente de mayor a menor
+                    </small>
+                </div>
+
+                <div class="button-group">
+                    <button id="btn-calcular"> Calcular VLSM</button>
+                    <button id="btn-limpiar"> Limpiar</button>
+                </div>
+
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Calculando subredes VLSM...</p>
+                </div>
+
+          
+            </div>
+
+            <div class="stats" id="stats-container">
+                <!-- Las estadísticas se generarán aquí -->
+            </div>
+
+            <div class="result-section">
+                <h3 style="margin-bottom: 15px; color: #2c3e50;"> Resultados del Cálculo VLSM</h3>
+                <div class="table-container">
+                    <table id="resultados-table">
+                        <thead>
+                            <tr>
+                                <th>IP Red</th>
+                                <th>Prefijo</th>
+                                <th>Máscara</th>
+                                <th>Hosts Req</th>
+                                <th>Hosts Disp</th>
+                                <th>Primer Host</th>
+                                <th>Último Host</th>
+                                <th>Broadcast</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-body">
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 40px; color: #777;">
+                                     Ingrese los datos arriba y haga clic en "Calcular VLSM"
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4 style="margin-bottom: 10px; color: #2c3e50;"> ¿Cómo funciona VLSM?</h4>
+                <p>VLSM (Variable Length Subnet Masking) permite crear subredes de diferentes tamaños dentro de una misma red principal. Esta calculadora:</p>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li>Ordena los hosts de mayor a menor automáticamente</li>
+                    <li>Calcula el prefijo (/n) necesario para cada subred</li>
+                    <li>Asigna las direcciones de red, hosts y broadcast</li>
+                    <li>Muestra si hay suficientes hosts disponibles</li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>Calculadora VLSM </p>
+            <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">
+                
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // ============================================
+        // FUNCIÓN PRINCIPAL DE CÁLCULO VLSM
+        // ============================================
+        function calcularVLSM(ipBase, hostsList) {
+            // Validar IP
+            function validarIP(ip) {
+                const partes = ip.split('.');
+                if (partes.length !== 4) return false;
+                
+                for (let parte of partes) {
+                    const num = parseInt(parte, 10);
+                    if (isNaN(num) || num < 0 || num > 255) return false;
+                }
+                return true;
+            }
+
+            if (!validarIP(ipBase)) {
+                throw new Error('La IP ingresada no es válida');
+            }
+
+            // Ordenar hosts de mayor a menor
+            hostsList.sort((a, b) => b - a);
+            
+            let resultados = [];
+            let subredActual = ipToInt(ipBase);
+
+            for (let h of hostsList) {
+                if (h <= 0) {
+                    throw new Error('El número de hosts debe ser mayor a 0');
+                }
+
+                // Calcular bits necesarios para hosts
+                const bitsHost = Math.ceil(Math.log2(h + 2));
+                const nuevaMascara = 32 - bitsHost;
+                const tamañoRed = Math.pow(2, bitsHost);
+
+                // Crear subred
+                const ipRed = intToIp(subredActual);
+                const mascara = calcularMascara(nuevaMascara);
+                
+                // Calcular direcciones
+                const primerHost = subredActual + 1;
+                const ultimoHost = subredActual + tamañoRed - 2;
+                const broadcast = subredActual + tamañoRed - 1;
+
+                // Verificar que no exceda el rango
+                if (broadcast > ipToInt('255.255.255.255')) {
+                    throw new Error('Se excedió el rango de direcciones IP disponibles');
+                }
+
+                resultados.push({
+                    red: ipRed,
+                    prefijo: `/${nuevaMascara}`,
+                    mascara: mascara,
+                    hostsRequeridos: h,
+                    hostsDisponibles: tamañoRed - 2,
+                    primerHost: intToIp(primerHost),
+                    ultimoHost: intToIp(ultimoHost),
+                    broadcast: intToIp(broadcast)
+                });
+
+                // Avanzar a la siguiente subred
+                subredActual = broadcast + 1;
+            }
+
+            return resultados;
+        }
+
+        // ============================================
+        // FUNCIONES AUXILIARES
+        // ============================================
+        function ipToInt(ip) {
+            return ip.split('.')
+                .reduce((acc, octeto) => (acc << 8) + parseInt(octeto, 10), 0) >>> 0;
+        }
+
+        function intToIp(num) {
+            return [
+                (num >>> 24) & 255,
+                (num >>> 16) & 255,
+                (num >>> 8) & 255,
+                num & 255
+            ].join('.');
+        }
+
+        function calcularMascara(prefijo) {
+            let mascara = 0;
+            for (let i = 0; i < prefijo; i++) {
+                mascara |= 1 << (31 - i);
+            }
+            return intToIp(mascara);
+        }
+
+        // ============================================
+        // INTERFAZ DE USUARIO
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnCalcular = document.getElementById('btn-calcular');
+            const btnLimpiar = document.getElementById('btn-limpiar');
+            const tablaBody = document.getElementById('tabla-body');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('error-message');
+            const statsContainer = document.getElementById('stats-container');
+
+            function mostrarLoading(mostrar) {
+                loading.style.display = mostrar ? 'flex' : 'none';
+            }
+
+            function mostrarError(mensaje) {
+                errorMessage.textContent = mensaje;
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 5000);
+            }
+
+            function actualizarEstadisticas(resultados) {
+                if (resultados.length === 0) {
+                    statsContainer.innerHTML = '';
+                    return;
+                }
+
+                let totalHostsReq = 0;
+                let totalHostsDisp = 0;
+                let subredesSobrantes = 0;
+
+                resultados.forEach(r => {
+                    totalHostsReq += r.hostsRequeridos;
+                    totalHostsDisp += r.hostsDisponibles;
+                    if (r.hostsDisponibles > r.hostsRequeridos) {
+                        subredesSobrantes++;
+                    }
+                });
+
+                const eficiencia = ((totalHostsReq / totalHostsDisp) * 100).toFixed(1);
+
+                statsContainer.innerHTML = `
+                    <div class="stat-box">
+                        <span class="stat-value">${resultados.length}</span>
+                        <span class="stat-label">Subredes Creadas</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value">${totalHostsReq}</span>
+                        <span class="stat-label">Hosts Solicitados</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value">${totalHostsDisp}</span>
+                        <span class="stat-label">Hosts Disponibles</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value">${eficiencia}%</span>
+                        <span class="stat-label">Eficiencia</span>
+                    </div>
+                `;
+            }
+
+            function actualizarTabla(resultados) {
+                tablaBody.innerHTML = '';
+
+                if (resultados.length === 0) {
+                    tablaBody.innerHTML = `
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px; color: #777;">
+                                No hay datos para mostrar
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                resultados.forEach((item, index) => {
+                    const fila = document.createElement('tr');
+                    
+                    // Verificar si hay suficientes hosts
+                    const suficiente = item.hostsDisponibles >= item.hostsRequeridos;
+                    
+                    fila.innerHTML = `
+                        <td><span class="ip-cell">${item.red}</span></td>
+                        <td><strong>${item.prefijo}</strong></td>
+                        <td><span class="ip-cell">${item.mascara}</span></td>
+                        <td><span class="${suficiente ? 'success' : 'warning'}">${item.hostsRequeridos}</span></td>
+                        <td><span class="${suficiente ? 'success' : 'warning'}">${item.hostsDisponibles}</span></td>
+                        <td><span class="ip-cell">${item.primerHost}</span></td>
+                        <td><span class="ip-cell">${item.ultimoHost}</span></td>
+                        <td><span class="ip-cell" style="color: #e74c3c;">${item.broadcast}</span></td>
+                    `;
+                    
+                    if (!suficiente) {
+                        fila.style.backgroundColor = '#fff5f5';
+                    }
+                    
+                    tablaBody.appendChild(fila);
+                });
+            }
+
+            // Evento: Calcular
+            btnCalcular.addEventListener('click', function() {
+                const ipBase = document.getElementById('ip-base').value.trim();
+                const hostsInput = document.getElementById('hosts').value.trim();
+
+                if (!ipBase || !hostsInput) {
+                    mostrarError('Por favor, complete todos los campos');
+                    return;
+                }
+
+                // Convertir hosts a array
+                let hostsList;
+                try {
+                    hostsList = hostsInput.split(',')
+                        .map(h => parseInt(h.trim(), 10))
+                        .filter(h => !isNaN(h));
+                    
+                    if (hostsList.length === 0) {
+                        throw new Error('No se encontraron números válidos');
+                    }
+                } catch (error) {
+                    mostrarError('Formato de hosts inválido. Use: 4000, 1000, 200');
+                    return;
+                }
+
+                mostrarLoading(true);
+                errorMessage.style.display = 'none';
+
+                // Pequeña pausa para mostrar el loading
+                setTimeout(() => {
+                    try {
+                        const resultados = calcularVLSM(ipBase, hostsList);
+                        actualizarTabla(resultados);
+                        actualizarEstadisticas(resultados);
+                    } catch (error) {
+                        mostrarError(error.message);
+                    } finally {
+                        mostrarLoading(false);
+                    }
+                }, 500);
+            });
+
+            // Evento: Limpiar
+            btnLimpiar.addEventListener('click', function() {
+                document.getElementById('ip-base').value = '';
+                document.getElementById('hosts').value = '';
+                tablaBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px; color: #777;">
+                            👆 Ingrese los datos arriba y haga clic en "Calcular VLSM"
+                        </td>
+                    </tr>
+                `;
+                statsContainer.innerHTML = '';
+                errorMessage.style.display = 'none';
+            });
+
+            // Calcular automáticamente al cargar la página
+            setTimeout(() => {
+                btnCalcular.click();
+            }, 100);
+        });
+    </script>
+</body>
+</html>
